@@ -12,7 +12,7 @@ on:
       announceOnDiscord:
         description: 'Announce new release on Discord channel'     
         required: true
-        default: 'yes'
+        default: 'no'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -41,6 +41,13 @@ jobs:
       - name: Initializing build
         run: echo Initializing build for platform ${{ matrix.platform }}
 
+      - name: CI workflow device configuration
+        run: |
+          uname -a
+          lscpu
+          free -h
+          
+
       - name: Updating APT repository
         run: sudo apt-get update
 
@@ -50,10 +57,10 @@ jobs:
       - name: Installing Python and OpenJDK
         run: sudo apt-get install -y python openjdk-8-jdk-headless libncurses5 ccache
 
-      - name: Reclaiming disk space on / by disabling swap partition
-        run: |
-          sudo swapoff -av
-          sudo rm -f /swapfile
+      # - name: Reclaiming disk space on / by disabling swap partition
+      #   run: |
+      #     sudo swapoff -av
+      #     sudo rm -f /swapfile
 
       - name: Reclaiming disk space on / by removing packages
         run: |
@@ -62,7 +69,6 @@ jobs:
           sudo apt autoremove -yq
           sudo rm -rf /opt/hostedtoolcache /usr/local /usr/share/dotnet /usr/share/swift
           sudo rm -rf /usr/share/dotnet
-
 
       - name: Checking-out source-code in $GITHUB_WORKSPACE
         uses: actions/checkout@v2
@@ -128,8 +134,7 @@ jobs:
       - name: Uploading args.gn
         run: rclone copy --fast-list --transfers=128 --retries=10 secondary_disk/out/android_${{ matrix.platform }}/args.gn cache:kiwibrowser-next-builds-${{ matrix.platform }}/
 
-      - name: Calling buildbot
-        if: false
+      - name: Execute build script
         run: curl ipinfo.io
 
       - name: Downloading binary objects cache to $HOME/cache
