@@ -70,6 +70,25 @@ jobs:
           sudo rm -rf /opt/hostedtoolcache /usr/local /usr/share/dotnet /usr/share/swift
           sudo rm -rf /usr/share/dotnet
 
+      - name: Install chromium deps tool
+        run: |
+          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git ~/depot_tools
+          export PATH="$PATH:~/depot_tools"
+
+      - name: Download chromium source code
+        run: |
+          mkdir ~/chromium && cd ~/chromium
+          fetch --nohooks android --no-history
+
+      - name: Install chromium build depends
+        run: |
+          cd src
+          git fetch --tags
+          git checkout 99.0.4844.73
+          gclient sync -D --with_branch_heads --with_tags --jobs 32
+          python2 third_party/android_deps/fetch_all.py
+          ./build/install-build-deps-android.sh
+
       - name: Checking-out source-code in $GITHUB_WORKSPACE
         uses: actions/checkout@v2
 
