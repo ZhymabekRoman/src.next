@@ -43,6 +43,7 @@ jobs:
 
       - name: CI workflow device configuration
         run: |
+          df -h
           uname -a
           lscpu
           free -h
