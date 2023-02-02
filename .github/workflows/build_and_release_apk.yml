@@ -80,7 +80,7 @@ jobs:
         run: |
           export PATH="$PATH:~/depot_tools"  # TODO: fix
           mkdir ~/chromium && cd ~/chromium
-          fetch --nohooks android --nohistory
+          fetch --nohooks -nohistory android
 
       - name: Install chromium build depends
         run: |
