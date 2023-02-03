@@ -78,7 +78,7 @@ jobs:
 
       - name: Download chromium source code
         run: |
-          export PATH="$PATH:~/depot_tools"  # TODO: fix
+          export PATH="$PATH:$HOME/depot_tools"  # TODO: fix
           mkdir ~/chromium && cd ~/chromium
           fetch --nohooks --nohistory android
 
