@@ -48,7 +48,6 @@ jobs:
           lscpu
           free -h
           
-
       - name: Updating APT repository
         run: sudo apt-get update
 
@@ -63,14 +62,26 @@ jobs:
       #     sudo swapoff -av
       #     sudo rm -f /swapfile
 
-      - name: Reclaiming disk space on / by removing packages
-        run: |
-          echo "Free additional disk space on host"
-          sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|libmono|php|aspnetcore)') mono-runtime-common monodoc-manual ruby
-          sudo apt autoremove -yq
-          sudo rm -rf /opt/hostedtoolcache /usr/local /usr/share/dotnet /usr/share/swift
-          sudo rm -rf /usr/share/dotnet
+      # - name: Reclaiming disk space on / by removing packages
+      #   run: |
+      #     echo "Free additional disk space on host"
+      #     sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|libmono|php|aspnetcore)') mono-runtime-common monodoc-manual ruby
+      #     sudo apt autoremove -yq
+      #     sudo rm -rf /opt/hostedtoolcache /usr/local /usr/share/dotnet /usr/share/swift
+      #     sudo rm -rf /usr/share/dotnet
 
+      - name: Creating secondary disk folder /external_storage
+        run: |
+          sudo mkdir -p /external_storage
+          sudo chown -R runner:docker /external_storage
+      
+      - name: Mount NFS storage
+        run: |
+          sudo apt install nfs-common
+          sudo mount -t nfs $IP_NFS:/balak /external_storage
+        env:
+          IP_NFS: ${{ secrets.IP_NFS }} 
+    
       - name: Install chromium deps tool
         run: |
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git ~/depot_tools
@@ -79,12 +90,12 @@ jobs:
       - name: Download chromium source code
         run: |
           export PATH="$PATH:$HOME/depot_tools"  # TODO: fix
-          mkdir ~/chromium && cd ~/chromium
+          mkdir /external_storage/chromium && cd /external_storage/chromium
           fetch --nohooks --nohistory android
 
       - name: Install chromium build depends
         run: |
-          cd ~/chromium
+          cd /external_storage/chromium
           echo $(ls)
           echo $(pwd)
           cd src
@@ -93,15 +104,7 @@ jobs:
           gclient sync -D --with_branch_heads --with_tags --jobs 32
           python2 third_party/android_deps/fetch_all.py
           ./build/install-build-deps-android.sh
-
-      - name: Checking-out source-code in $GITHUB_WORKSPACE
-        uses: actions/checkout@v2
-
-      - name: Creating secondary disk folder on /dev/disk/azure/resource-part1 (SSD)
-        run: |
-          sudo mkdir -p /extended_data
-          sudo chown -R runner:docker /extended_data
-      
+     
       # If you want to use only the SSD, you can use:
       - name: On SSD - Creating symlink on /dev/disk/azure/root-part1 pointing to /dev/disk/azure/resource-part1
         run: |
