@@ -1,3 +1,5 @@
+
+
 # Build APKs for Kiwi Browser Next
 name: 'Kiwi: build and release apk'
 
@@ -24,7 +26,8 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        platform: [arm, arm64, x86, x64]
+        platform: [arm]
+        # platform: [arm, arm64, x86, x64]
 
     # The GitHub Actions machines have a "slow disk", and a SSD "fast" disk.
     # However, there is not enough space to do all the processing on the SSD.
@@ -105,11 +108,46 @@ jobs:
           python2 third_party/android_deps/fetch_all.py
           ./build/install-build-deps-android.sh
      
-      # If you want to use only the SSD, you can use:
-      - name: On SSD - Creating symlink on /dev/disk/azure/root-part1 pointing to /dev/disk/azure/resource-part1
+      - name: Settings build config
+        working-directory: /external_storage/chromium/src
         run: |
-          sudo ln -s /extended_data /mnt/secondary_disk
-          sudo ln -s /mnt/secondary_disk $GITHUB_WORKSPACE/
+          mkdir -p out/Default
+
+          cat <<EOF > out/Default/args.gn
+          target_os = "android"
+          target_cpu = "arm"
+          android_channel = "stable"
+          android_default_version_name = "99.0.4844.73"
+          android_default_version_code = "484407300"
+          is_component_build = false
+          is_debug = false
+          is_official_build = true
+          symbol_level = 1
+          disable_fieldtrial_testing_config = true
+          dfmify_dev_ui = false
+          disable_autofill_assistant_dfm = true
+          disable_tab_ui_dfm = true
+          ffmpeg_branding = "Chrome"
+          proprietary_codecs = true
+          is_cfi = true
+          use_cfi_cast = true
+          enable_gvr_services = false
+          enable_remoting = false
+          enable_reporting = false
+          EOF
+
+          gn gen out/Default
+
+          autoninja -C out/Default chrome_public_apk
+
+          ls out/Default
+          ls out/Default/bin/chrome_public_apk
+
+      # If you want to use only the SSD, you can use:
+      #- name: On SSD - Creating symlink on /dev/disk/azure/root-part1 pointing to /dev/disk/azure/resource-part1
+      #  run: |
+      #    sudo ln -s /extended_data /mnt/secondary_disk
+      #    sudo ln -s /mnt/secondary_disk $GITHUB_WORKSPACE/
       # or alternatively, to work on the main partition
       # - name: On HDD - Creating symlink on /dev/disk/azure/root-part1 pointing to /dev/disk/azure/resource-part1
       #  run: |
@@ -136,39 +174,39 @@ jobs:
           echo 'user = storage' >> $HOME/.config/rclone/rclone.conf
           echo 'key_pem = ${{ secrets.STORAGE_KEY }}' >> $HOME/.config/rclone/rclone.conf
 
-      - name: Modifying args.gn (arm)
-        if: matrix.platform == 'arm'
-        run: sed -i "s#android_default_version_code = \"1\"#android_default_version_code = \"$(date '+%y%m%d')1\"#" secondary_disk/out/android_${{ matrix.platform }}/args.gn
+#      - name: Modifying args.gn (arm)
+#        if: matrix.platform == 'arm'
+#        run: sed -i "s#android_default_version_code = \"1\"#android_default_version_code = \"$(date '+%y%m%d')1\"#" secondary_disk/out/android_${{ matrix.platform }}/args.gn
 
-      - name: Modifying args.gn (arm64)
-        if: matrix.platform == 'arm64'
-        run: sed -i "s#android_default_version_code = \"1\"#android_default_version_code = \"$(date '+%y%m%d')2\"#" secondary_disk/out/android_${{ matrix.platform }}/args.gn
+#      - name: Modifying args.gn (arm64)
+#        if: matrix.platform == 'arm64'
+#        run: sed -i "s#android_default_version_code = \"1\"#android_default_version_code = \"$(date '+%y%m%d')2\"#" secondary_disk/out/android_${{ matrix.platform }}/args.gn
 
-      - name: Modifying args.gn (x86)
-        if: matrix.platform == 'x86'
-        run: sed -i "s#android_default_version_code = \"1\"#android_default_version_code = \"$(date '+%y%m%d')3\"#" secondary_disk/out/android_${{ matrix.platform }}/args.gn
+#      - name: Modifying args.gn (x86)
+#        if: matrix.platform == 'x86'
+#        run: sed -i "s#android_default_version_code = \"1\"#android_default_version_code = \"$(date '+%y%m%d')3\"#" secondary_disk/out/android_${{ matrix.platform }}/args.gn
 
-      - name: Modifying args.gn (x64)
-        if: matrix.platform == 'x64'
-        run: sed -i "s#android_default_version_code = \"1\"#android_default_version_code = \"$(date '+%y%m%d')4\"#" secondary_disk/out/android_${{ matrix.platform }}/args.gn
+#      - name: Modifying args.gn (x64)
+#        if: matrix.platform == 'x64'
+#        run: sed -i "s#android_default_version_code = \"1\"#android_default_version_code = \"$(date '+%y%m%d')4\"#" secondary_disk/out/android_${{ matrix.platform }}/args.gn
 
-      - name: Displaying args.gn
-        run: cat secondary_disk/out/android_${{ matrix.platform }}/args.gn
+#      - name: Displaying args.gn
+#        run: cat secondary_disk/out/android_${{ matrix.platform }}/args.gn
 
-      - name: Checking available disk-space
-        run: df -h
+#      - name: Checking available disk-space
+#        run: df -h
 
-      - name: Uploading args.gn
-        run: rclone copy --fast-list --transfers=128 --retries=10 secondary_disk/out/android_${{ matrix.platform }}/args.gn cache:kiwibrowser-next-builds-${{ matrix.platform }}/
+#      - name: Uploading args.gn
+#        run: rclone copy --fast-list --transfers=128 --retries=10 secondary_disk/out/android_${{ matrix.platform }}/args.gn cache:kiwibrowser-next-builds-${{ matrix.platform }}/
 
-      - name: Execute build script
-        run: curl ipinfo.io
+#      - name: Execute build script
+#        run: curl ipinfo.io
 
-      - name: Downloading binary objects cache to $HOME/cache
-        run: rclone copy --fast-list --transfers=128 --retries=10 cache:kiwibrowser-next-builds-${{ matrix.platform }}/ $HOME/kiwibrowser-next-builds-${{ matrix.platform }}
+#      - name: Downloading binary objects cache to $HOME/cache
+#        run: rclone copy --fast-list --transfers=128 --retries=10 cache:kiwibrowser-next-builds-${{ matrix.platform }}/ $HOME/kiwibrowser-next-builds-${{ matrix.platform }}
 
-      - name: Transferring build to the standard Kiwi Browser run ID
-        run: rclone copy --fast-list --transfers=128 --retries=10 cache:kiwibrowser-next-builds-${{ matrix.platform }}/ cache:kiwibrowser-builds/${{ github.run_id }}/${{ matrix.platform }}
+#      - name: Transferring build to the standard Kiwi Browser run ID
+#        run: rclone copy --fast-list --transfers=128 --retries=10 cache:kiwibrowser-next-builds-${{ matrix.platform }}/ cache:kiwibrowser-builds/${{ github.run_id }}/${{ matrix.platform }}
 
       - name: Listing files
         run: |
@@ -186,18 +224,6 @@ jobs:
     needs: build
 
     steps:
-      - name: Installing rclone
-        run: curl https://rclone.org/install.sh | sudo bash
-    
-      - name: Creating rclone config
-        run: |
-          mkdir -p $HOME/.config/rclone/
-          echo '[cache]' > $HOME/.config/rclone/rclone.conf
-          echo 'type = sftp' >> $HOME/.config/rclone/rclone.conf
-          echo 'host = ${{ secrets.STORAGE_HOST }}' >> $HOME/.config/rclone/rclone.conf
-          echo 'user = storage' >> $HOME/.config/rclone/rclone.conf
-          echo 'key_pem = ${{ secrets.STORAGE_KEY }}' >> $HOME/.config/rclone/rclone.conf
-
       - name: Creating release
         id: create_release
         uses: actions/create-release@v1.1.4
