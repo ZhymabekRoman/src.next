@@ -84,6 +84,7 @@ jobs:
 
       - name: Install chromium build depends
         run: |
+          cd ~/chromium
           echo $(ls)
           echo $(pwd)
           cd src
