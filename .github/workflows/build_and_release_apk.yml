@@ -79,6 +79,9 @@ jobs:
         run: |
           sudo apt install nfs-common
           sudo mount -t nfs $IP_NFS:/balak /external_storage
+          sudo chown -R $USER /external_storage
+          echo $(ls /external_storage)
+          echo $(ls /)
         env:
           IP_NFS: ${{ secrets.IP_NFS }} 
     
