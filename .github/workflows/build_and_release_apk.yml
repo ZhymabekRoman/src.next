@@ -74,7 +74,7 @@ jobs:
       - name: Install chromium deps tool
         run: |
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git ~/depot_tools
-          export PATH="$PATH:~/depot_tools"
+          export PATH="$PATH:$HOME/depot_tools"
 
       - name: Download chromium source code
         run: |
