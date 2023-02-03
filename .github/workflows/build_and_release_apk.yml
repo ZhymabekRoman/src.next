@@ -22,7 +22,7 @@ jobs:
 
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 1
       matrix:
         platform: [arm, arm64, x86, x64]
 
@@ -51,9 +51,6 @@ jobs:
       - name: Updating APT repository
         run: sudo apt-get update
 
-      - name: Installing rclone
-        run: curl https://rclone.org/install.sh | sudo bash
-
       - name: Installing Python and OpenJDK
         run: sudo apt-get install -y python2 openjdk-8-jdk-headless libncurses5 ccache
 
@@ -73,22 +70,25 @@ jobs:
       - name: Creating secondary disk folder /external_storage
         run: |
           sudo mkdir -p /external_storage
-          sudo chown -R runner:docker /external_storage
+          sudo chown -R $USER /external_storage
       
       - name: Mount NFS storage
         run: |
           sudo apt install nfs-common
           sudo mount -t nfs $IP_NFS:/balak /external_storage
           sudo chown -R $USER /external_storage
-          echo $(ls /external_storage)
-          echo $(ls /)
         env:
           IP_NFS: ${{ secrets.IP_NFS }} 
     
+    # - name: Waiting for lock file
+    #   run: 
+    
+      - name: Clean NFS storage trash files
+        run: time rm -rfv /external_storage/chromium
+    
       - name: Install chromium deps tool
-        run: |
-          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git ~/depot_tools
-          export PATH="$PATH:$HOME/depot_tools"
+        run: git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git ~/depot_tools
+          # export PATH="$PATH:$HOME/depot_tools"
 
       - name: Download chromium source code
         run: |
@@ -97,14 +97,11 @@ jobs:
           fetch --nohooks --nohistory android
 
       - name: Install chromium build depends
+        working-directory: /external_storage/chromium/src
         run: |
-          cd /external_storage/chromium
-          echo $(ls)
-          echo $(pwd)
-          cd src
           git fetch --tags
           git checkout 99.0.4844.73
-          gclient sync -D --with_branch_heads --with_tags --jobs 32
+          gclient sync -D --with_branch_heads --with_tags --jobs 4
           python2 third_party/android_deps/fetch_all.py
           ./build/install-build-deps-android.sh
      
