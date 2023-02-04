@@ -75,7 +75,7 @@ jobs:
           export PATH="$PATH:$GITHUB_WORKSPACE/depot_tools"  # TODO: fix
           cd $GITHUB_WORKSPACE/chromium/src
           echo "target_os = [ 'android' ]" >> ../.gclient
-          gclient sync -D --no-history -v -j 5
+          gclient sync -D --no-history -v 
           build/install-build-deps.sh --android
           gclient runhooks
      
