@@ -15,6 +15,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Reclaiming disk space on / by removing packages
+        run: |
+           echo "Free additional disk space on host"
+           sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|libmono|php|aspnetcore)') mono-runtime-common monodoc-manual ruby
+           sudo apt autoremove -yq
+           sudo rm -rf /opt/hostedtoolcache /usr/local /usr/share/dotnet /usr/share/swift
+           sudo rm -rf /usr/share/dotnet
+           sudo rm -rf /opt/ghc
+           sudo rm -rf "/usr/local/share/boost"
+           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
       - name: Build
         run: |
           echo "Free space:"
