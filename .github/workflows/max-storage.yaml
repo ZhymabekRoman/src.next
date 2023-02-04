@@ -23,7 +23,7 @@ jobs:
           # Set "performance" governor to each detected CPU
           for i in $(seq 0 $((processors_count-1)))
           do
-          	cpufreq-set -g performance -c $i
+          	sudo cpufreq-set -g performance -c $i
           done
           
           sudo systemctl is-enabled ondemand
