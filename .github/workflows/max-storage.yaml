@@ -15,19 +15,19 @@ jobs:
         # platform: [arm, arm64, x86, x64]
     
     steps:
-      - name: Set performance governor and disable save power service
-        run: |
-          sudo apt install cpufrequtils -y
-          processors_count=$(cat /proc/cpuinfo | grep processor | wc -l)
+      # - name: Set performance governor and disable save power service
+      #   run: |
+      #     sudo apt install cpufrequtils -y
+      #     processors_count=$(cat /proc/cpuinfo | grep processor | wc -l)
 
-          # Set "performance" governor to each detected CPU
-          for i in $(seq 0 $((processors_count-1)))
-          do
-          	sudo cpufreq-set -g performance -c $i
-          done
+      #     # Set "performance" governor to each detected CPU
+      #     for i in $(seq 0 $((processors_count-1)))
+      #     do
+      #     	sudo cpufreq-set -g performance -c $i
+      #     done
           
-          sudo systemctl is-enabled ondemand
-          sudo systemctl disable ondemand
+       #    sudo systemctl is-enabled ondemand
+       #   sudo systemctl disable ondemand
 
       - name: Updating APT repository
         run: sudo apt-get update
