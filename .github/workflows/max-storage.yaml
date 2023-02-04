@@ -74,11 +74,10 @@ jobs:
         run: |
           export PATH="$PATH:$GITHUB_WORKSPACE/depot_tools"  # TODO: fix
           cd $GITHUB_WORKSPACE/chromium/src
-          git fetch --tags
-          git checkout 99.0.4844.73
-          gclient sync -D --with_branch_heads --with_tags --jobs 6
-          python2 third_party/android_deps/fetch_all.py
-          ./build/install-build-deps-android.sh
+          echo "target_os = [ 'android' ]" >> ../.gclient
+          gclient sync
+          build/install-build-deps.sh --android
+          gclient runhooks
      
       - name: Settings build config
         run: |
@@ -89,9 +88,6 @@ jobs:
           cat <<EOF > out/Default/args.gn
           target_os = "android"
           target_cpu = "arm"
-          android_channel = "stable"
-          android_default_version_name = "99.0.4844.73"
-          android_default_version_code = "484407300"
           is_component_build = false
           is_debug = false
           is_official_build = true
