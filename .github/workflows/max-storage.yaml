@@ -5,12 +5,26 @@ jobs:
   build:
     name: Build my artifact
     runs-on: ubuntu-20.04
+    
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        platform: [arm]
+        # platform: [arm, arm64, x86, x64]
+    
     steps:
+      - name: Updating APT repository
+        run: sudo apt-get update
+    
       - name: Reclaiming disk space on / by removing packages
         run: |
            echo "Free additional disk space on host"
-           sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|libmono|php|aspnetcore)') mono-runtime-common monodoc-manual ruby
+           sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|libmono|php|aspnetcore)') mono-runtime-common monodoc-manual ruby azure-cli shellcheck zsync firefox google-cloud-sdk 
            sudo apt autoremove -yq
+           sudo apt-get autoclean
+      - name: Reclaiming disk space on / by removing folders
+        run: |
            sudo rm -rf /opt/hostedtoolcache /usr/local /usr/share/dotnet /usr/share/swift
            sudo rm -rf /usr/share/dotnet
            sudo rm -rf /opt/ghc
@@ -28,3 +42,55 @@ jobs:
         run: |
           echo "Free space:"
           df -h
+
+      - name: Installing Python and OpenJDK
+        run: sudo apt install -y python2 openjdk-8-jdk-headless libncurses5 ccache
+        
+      - name: Install chromium deps tool
+        run: git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git $GITHUB_WORKSPACE/depot_tools
+        
+      - name: Download chromium source code
+        run: |
+          export PATH="$PATH:$GITHUB_WORKSPACE/depot_tools"  # TODO: fix
+          mkdir $GITHUB_WORKSPACE/chromium && cd $GITHUB_WORKSPACE/chromium
+          fetch --nohooks --nohistory android
+          
+      - name: Install chromium build depends
+        working-directory: $GITHUB_WORKSPACE/chromium/src
+        run: |
+          git fetch --tags
+          git checkout 99.0.4844.73
+          gclient sync -D --with_branch_heads --with_tags --jobs 4
+          python2 third_party/android_deps/fetch_all.py
+          ./build/install-build-deps-android.sh
+     
+      - name: Settings build config
+        working-directory: $GITHUB_WORKSPACE/chromium/src
+        run: |
+          mkdir -p out/Default
+          cat <<EOF > out/Default/args.gn
+          target_os = "android"
+          target_cpu = "arm"
+          android_channel = "stable"
+          android_default_version_name = "99.0.4844.73"
+          android_default_version_code = "484407300"
+          is_component_build = false
+          is_debug = false
+          is_official_build = true
+          symbol_level = 1
+          disable_fieldtrial_testing_config = true
+          dfmify_dev_ui = false
+          disable_autofill_assistant_dfm = true
+          disable_tab_ui_dfm = true
+          ffmpeg_branding = "Chrome"
+          proprietary_codecs = true
+          is_cfi = true
+          use_cfi_cast = true
+          enable_gvr_services = false
+          enable_remoting = false
+          enable_reporting = false
+          EOF
+          gn gen out/Default
+          autoninja -C out/Default chrome_public_apk
+          ls out/Default
+          ls out/Default/bin/chrome_public_apk
