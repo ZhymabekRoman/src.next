@@ -17,7 +17,15 @@ jobs:
     steps:
       - name: Set performance governor and disable save power service
         run: |
-          echo "performance" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+          sudo apt install cpufrequtils -y
+          processors_count=$(cat /proc/cpuinfo | grep processor | wc -l)
+
+          # Set "performance" governor to each detected CPU
+          for i in $(seq 0 $((processors_count-1)))
+          do
+          	cpufreq-set -g performance -c $i
+          done
+          
           sudo systemctl is-enabled ondemand
           sudo systemctl disable ondemand
 
