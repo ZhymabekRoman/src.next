@@ -56,8 +56,8 @@ jobs:
           fetch --nohooks --nohistory android
           
       - name: Install chromium build depends
-        working-directory: $GITHUB_WORKSPACE/chromium/src
         run: |
+          cd $GITHUB_WORKSPACE/chromium/src
           git fetch --tags
           git checkout 99.0.4844.73
           gclient sync -D --with_branch_heads --with_tags --jobs 6
@@ -65,8 +65,9 @@ jobs:
           ./build/install-build-deps-android.sh
      
       - name: Settings build config
-        working-directory: $GITHUB_WORKSPACE/chromium/src
         run: |
+          cd $GITHUB_WORKSPACE/chromium/src
+        
           mkdir -p out/Default
           cat <<EOF > out/Default/args.gn
           target_os = "android"
