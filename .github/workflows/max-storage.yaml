@@ -56,7 +56,7 @@ jobs:
         run: |
            echo "Free additional disk space on host"
            sudo systemctl stop snapd && sudo systemctl disable snapd
-           sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|gfortran-|libmono|php|aspnetcore)') apache2 snapd imagemagick powershell aria2 ansible shellcheck mono-runtime-common monodoc-manual ruby azure-cli shellcheck zsync firefox heroku google-chrome-stable google-cloud-sdk 
+           sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|gfortran-|libmono|php|aspnetcore)') apache2 snapd imagemagick powershell aria2 ansible shellcheck mono-runtime-common monodoc-manual ruby azure-cli shellcheck zsync firefox google-chrome-stable google-cloud-sdk 
            sudo apt autoremove -yq
            sudo apt-get autoclean
 
