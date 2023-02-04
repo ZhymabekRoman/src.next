@@ -28,6 +28,12 @@ jobs:
           
        #    sudo systemctl is-enabled ondemand
        #   sudo systemctl disable ondemand
+      - name: CI workflow device configuration
+        run: |
+          df -h
+          uname -a
+          lscpu
+          free -h
 
       - name: Updating APT repository
         run: sudo apt-get update
