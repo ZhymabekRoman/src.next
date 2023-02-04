@@ -23,20 +23,20 @@ jobs:
            sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|libmono|php|aspnetcore)') mono-runtime-common monodoc-manual ruby azure-cli shellcheck zsync firefox google-cloud-sdk 
            sudo apt autoremove -yq
            sudo apt-get autoclean
+
       - name: Reclaiming disk space on / by removing folders
         run: |
-           sudo rm -rf /opt/hostedtoolcache /usr/local /usr/share/dotnet /usr/share/swift
-           sudo rm -rf /usr/share/dotnet
-           sudo rm -rf /opt/ghc
+           sudo rm -rf /opt/hostedtoolcache /usr/local /usr/share/dotnet /usr/share/swift /opt/ghc
            sudo rm -rf "/usr/local/share/boost"
            sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 512
+          root-reserve-mb: 12288 # 12 GB
           swap-size-mb: 1024
           remove-dotnet: 'true'
+          remove-haskell: 'true'
 
       - name: Build
         run: |
@@ -60,7 +60,7 @@ jobs:
         run: |
           git fetch --tags
           git checkout 99.0.4844.73
-          gclient sync -D --with_branch_heads --with_tags --jobs 4
+          gclient sync -D --with_branch_heads --with_tags --jobs 6
           python2 third_party/android_deps/fetch_all.py
           ./build/install-build-deps-android.sh
      
@@ -92,5 +92,6 @@ jobs:
           EOF
           gn gen out/Default
           autoninja -C out/Default chrome_public_apk
+          
           ls out/Default
           ls out/Default/bin/chrome_public_apk
