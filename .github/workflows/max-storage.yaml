@@ -5,7 +5,7 @@ on: push
 jobs:
   build:
     name: Build Kiwi Next
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     
     strategy:
       fail-fast: false
@@ -43,14 +43,14 @@ jobs:
     
       - name: Fix problem packages
         run: |
-          set +e
+          # set +e
           sudo apt install -yf libglib2.0-0:i386
-          sudo dpkg --configure -a
-          sudo apt update
-          sudo apt --fix-broken install
-          sudo apt install -yf libglib2.0-0:i386
-          sudo dpkg --force depends -P libglib2.0-0:i386
-          sudo apt install -yf libglib2.0-0:i386
+          # sudo dpkg --configure -a
+          # sudo apt update
+          # sudo apt --fix-broken install
+          # sudo apt install -yf libglib2.0-0:i386
+          # sudo dpkg --force depends -P libglib2.0-0:i386
+          # sudo apt install -yf libglib2.0-0:i386
     
       - name: Reclaiming disk space on / by removing packages
         run: |
