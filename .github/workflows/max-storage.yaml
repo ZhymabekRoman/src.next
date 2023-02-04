@@ -63,6 +63,7 @@ jobs:
           
       - name: Install chromium build depends
         run: |
+          export PATH="$PATH:$GITHUB_WORKSPACE/depot_tools"  # TODO: fix
           cd $GITHUB_WORKSPACE/chromium/src
           git fetch --tags
           git checkout 99.0.4844.73
@@ -72,6 +73,7 @@ jobs:
      
       - name: Settings build config
         run: |
+          export PATH="$PATH:$GITHUB_WORKSPACE/depot_tools"  # TODO: fix
           cd $GITHUB_WORKSPACE/chromium/src
         
           mkdir -p out/Default
