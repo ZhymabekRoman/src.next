@@ -46,6 +46,7 @@ jobs:
           set +e
           sudo apt install -yf libglib2.0-0:i386
           sudo dpkg --configure -a
+          sudo apt update
           sudo apt --fix-broken install
           sudo apt install -yf libglib2.0-0:i386
     
