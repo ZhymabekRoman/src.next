@@ -35,10 +35,24 @@ jobs:
           lscpu
           free -h
     
+      - name: Enabling i386 and updating APT repository
+        run:  |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get upgrade -y
+    
+      - name: Fix problem packages
+        run: |
+          set +e
+          sudo apt install -yf libglib2.0-0:i386
+          sudo dpkg --configure -a
+          sudo apt --fix-broken install
+          sudo apt install -yf libglib2.0-0:i386
+    
       - name: Reclaiming disk space on / by removing packages
         run: |
            echo "Free additional disk space on host"
-           sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|libmono|php|aspnetcore)') mono-runtime-common monodoc-manual ruby azure-cli shellcheck zsync firefox google-cloud-sdk 
+           sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|gfortran-|libmono|php|aspnetcore)') imagemagick powershell aria2 ansible shellcheck mono-runtime-common monodoc-manual ruby azure-cli shellcheck zsync firefox heroku google-chrome-stable google-cloud-sdk 
            sudo apt autoremove -yq
            sudo apt-get autoclean
 
@@ -47,18 +61,6 @@ jobs:
            sudo rm -rf /opt/hostedtoolcache /usr/local /usr/share/dotnet /usr/share/swift /opt/ghc
            sudo rm -rf "/usr/local/share/boost"
            sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-
-      - name: Enabling i386 and updating APT repository
-        run:  |
-          sudo dpkg --add-architecture i386
-          sudo apt-get update
-    
-      - name: Fix problem packages
-        run: |
-          set +e
-          sudo apt install -yf libglib2.0-0:i386
-          sudo dpkg --configure -a
-          sudo apt --fix-broken install
 
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
