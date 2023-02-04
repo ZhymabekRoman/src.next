@@ -1,9 +1,9 @@
-name: My build action requiring more space
-on: push
+name: Build Kiwi Next
+on: [workflow_call]
 
 jobs:
   build:
-    name: Build my artifact
+    name: Build Kiwi Next
     runs-on: ubuntu-20.04
     
     strategy:
@@ -14,6 +14,12 @@ jobs:
         # platform: [arm, arm64, x86, x64]
     
     steps:
+      - name: Set performance governor and disable save power service
+        run: |
+          echo "performance" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+          sudo systemctl is-enabled ondemand
+          sudo systemctl disable ondemand
+
       - name: Updating APT repository
         run: sudo apt-get update
     
