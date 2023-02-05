@@ -3,6 +3,7 @@ on: push
 # on: [workflow_call]
 
 jobs:
+  timeout-minutes: 1200
   build:
     name: Build Kiwi Next
     runs-on: self-hosted
