@@ -125,7 +125,7 @@ jobs:
           export PATH="$PATH:$GITHUB_WORKSPACE/depot_tools"  # TODO: fix
           cd $GITHUB_WORKSPACE/chromium/src
           
-          autoninja -C out/Default chrome_public_apk -j 9
+          autoninja -C out/Default chrome_public_apk -j 18
           
           ls out/Default
           ls out/Default/bin/chrome_public_apk
