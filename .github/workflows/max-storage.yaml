@@ -15,19 +15,6 @@ jobs:
         # platform: [arm, arm64, x86, x64]
     
     steps:
-      # - name: Set performance governor and disable save power service
-      #   run: |
-      #     sudo apt install cpufrequtils -y
-      #     processors_count=$(cat /proc/cpuinfo | grep processor | wc -l)
-
-      #     # Set "performance" governor to each detected CPU
-      #     for i in $(seq 0 $((processors_count-1)))
-      #     do
-      #     	sudo cpufreq-set -g performance -c $i
-      #     done
-          
-       #    sudo systemctl is-enabled ondemand
-       #   sudo systemctl disable ondemand
       - name: CI workflow device configuration
         run: |
           df -h
@@ -38,14 +25,12 @@ jobs:
       - name: Reclaiming disk space on / by removing packages
         run: |
            echo "Free additional disk space on host"
-           # sudo snap remove $(snap list | awk '!/^Name|^core/ {print $1}')
-           sudo systemctl disable snapd.service
-           sudo systemctl disable snapd.socket
-           sudo systemctl disable snapd.seeded.service
-           sudo snap remove --purge firefox
-           sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|gfortran-|postgresql-|mongodb-|mysql-|libmono|php|aspnetcore)') apache2 imagemagick powershell aria2 ansible shellcheck mono-runtime-common monodoc-manual ruby shellcheck zsync firefox google-chrome-stable google-cloud-sdk 
+           sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|gfortran-|postgresql-|mongodb-|mysql-|mssql-|libmono|php|aspnetcore)') nginx nodejs apache2 ant imagemagick powershell aria2 ansible shellcheck mono-runtime-common monodoc-manual ruby shellcheck zsync pollinate bazel firefox google-chrome-stable sphinxsearch subversion yarn snmp google-cloud-sdk 
            sudo apt autoremove -yq
            sudo apt-get autoclean
+
+      - name: Show installed packages list
+        run: apt list | grep "installed"
 
       - name: Reclaiming disk space on / by removing folders
         run: |
@@ -58,6 +43,9 @@ jobs:
           sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get upgrade -y
+          
+      - name: Drop fucking snaped Firefox after apt upgrade
+        run: sudo snap remove --purge firefox
 
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
@@ -67,7 +55,7 @@ jobs:
           remove-dotnet: 'true'
           remove-haskell: 'true'
 
-      - name: Build
+      - name: Free space check
         run: |
           echo "Free space:"
           df -h
@@ -91,17 +79,24 @@ jobs:
         run: |
           export PATH="$PATH:$GITHUB_WORKSPACE/depot_tools"  # TODO: fix
           cd $GITHUB_WORKSPACE/chromium/src
+          
           echo "target_os = [ 'android' ]" >> ../.gclient
           gclient sync -D --no-history -v 
           build/install-build-deps.sh --android
           gclient runhooks
      
+      - name: Free space check
+        run: |
+          echo "Free space:"
+          df -h
+     
       - name: Settings build config
         run: |
           export PATH="$PATH:$GITHUB_WORKSPACE/depot_tools"  # TODO: fix
           cd $GITHUB_WORKSPACE/chromium/src
-        
+          
           mkdir -p out/Default
+          
           cat <<EOF > out/Default/args.gn
           target_os = "android"
           target_cpu = "arm"
@@ -121,8 +116,24 @@ jobs:
           enable_remoting = false
           enable_reporting = false
           EOF
+
           gn gen out/Default
-          autoninja -C out/Default chrome_public_apk
+
+      - name: Build APK
+        run: |
+          autoninja -C out/Default chrome_public_apk -j 9
           
           ls out/Default
           ls out/Default/bin/chrome_public_apk
+      
+      - name: Free space check
+        run: |
+          echo "Free space:"
+          df -h
+      
+      - name: Upload artefacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Kiwi APK build
+          path: out/Default/bin/
+          retention-days: 7
