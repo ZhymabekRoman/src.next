@@ -120,13 +120,29 @@ jobs:
 
           gn gen out/Default
 
-      - name: Build APK
+      - name: Configure executor
         run: |
           export PATH="$PATH:$GITHUB_WORKSPACE/depot_tools"  # TODO: fix
           cd $GITHUB_WORKSPACE/chromium/src
           
-          autoninja -C out/Default chrome_public_apk -j 18
+          wget https://gist.githubusercontent.com/ZhymabekRoman/040bcc13b933296599b4d427c1bab5d8/raw/8e499b0552de39a5e775432725bde2c7d85c0d6e/parted_executer.py
+
+      - name: Build APK (part 1)
+        run: |
+          export PATH="$PATH:$GITHUB_WORKSPACE/depot_tools"  # TODO: fix
+          cd $GITHUB_WORKSPACE/chromium/src
           
+          python3 parted_executer.py autoninja -C out/Default chrome_public_apk -j 8
+          
+      - name: Build APK (part 2)
+        run: |
+          export PATH="$PATH:$GITHUB_WORKSPACE/depot_tools"  # TODO: fix
+          cd $GITHUB_WORKSPACE/chromium/src
+          
+          python3 parted_executer.py autoninja -C out/Default chrome_public_apk -j 8
+      
+      - name: Check out files
+        run: |
           ls out/Default
           ls out/Default/bin/chrome_public_apk
       
