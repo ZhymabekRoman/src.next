@@ -2,7 +2,6 @@ name: Build Kiwi Next
 on: push
 # on: [workflow_call]
 
-
 jobs:
   build:
     name: Build Kiwi Next
@@ -35,7 +34,7 @@ jobs:
           df -h
 
       - name: Installing Python and OpenJDK
-        run: sudo apt install -y python2 openjdk-8-jdk-headless libncurses5 ccache
+        run: sudo apt install -y git python2 openjdk-8-jdk-headless libncurses5 ccache
         
       - name: Create necessary folders
         run: sudo mkdir -p /usr/local/share/fonts
