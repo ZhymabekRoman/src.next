@@ -49,7 +49,6 @@ jobs:
 
       - name: Reclaiming disk space on / by removing folders
         run: |
-           sudo rm -rf /snap /var/snap /var/lib/snapd /var/cache/snapd /usr/lib/snapd /root/snap
            sudo rm -rf /opt/hostedtoolcache /usr/local /usr/share/dotnet /usr/share/swift /opt/ghc
            sudo rm -rf "/usr/local/share/boost"
            sudo rm -rf "$AGENT_TOOLSDIRECTORY"
