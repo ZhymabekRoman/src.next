@@ -59,6 +59,7 @@ jobs:
            sudo systemctl disable snapd.service
            sudo systemctl disable snapd.socket
            sudo systemctl disable snapd.seeded.service
+           sudo snap remove --purge firefox
            sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|gfortran-|postgresql-|mongodb-|mysql-|libmono|php|aspnetcore)') apache2 snapd imagemagick powershell aria2 ansible shellcheck mono-runtime-common monodoc-manual ruby shellcheck zsync firefox google-chrome-stable google-cloud-sdk 
            sudo apt autoremove -yq
            sudo apt-get autoclean
