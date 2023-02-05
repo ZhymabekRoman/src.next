@@ -25,7 +25,7 @@ jobs:
       - name: Reclaiming disk space on / by removing packages
         run: |
            echo "Free additional disk space on host"
-           sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|gfortran-|postgresql-|mongodb-|mysql-|mssql-|libmono|php|aspnetcore)') nginx nodejs apache2 ant imagemagick powershell aria2 ansible shellcheck mono-runtime-common monodoc-manual ruby shellcheck zsync pollinate firefox google-chrome-stable sphinxsearch subversion yarn snmp google-cloud-sdk 
+           sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|gfortran-|nginx-|postgresql-|moby-|mongodb-|mysql-|mssql-|libmono|php|aspnetcore)') nginx nodejs apache2 ant imagemagick powershell aria2 ansible shellcheck mono-runtime-common monodoc-manual microsoft-edge-stable nano vim ruby screen shellcheck zsync pollinate firefox google-chrome-stable sphinxsearch subversion gh yarn snmp google-cloud-sdk 
            sudo apt autoremove -yq
            sudo apt-get autoclean
 
@@ -50,7 +50,7 @@ jobs:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 12288 # 12 GB
+          root-reserve-mb: 4096 # 4 GB
           swap-size-mb: 1024
           remove-dotnet: 'true'
           remove-haskell: 'true'
@@ -66,13 +66,14 @@ jobs:
       - name: Create necessary folders
         run: sudo mkdir -p /usr/local/share/fonts
         
-      - name: Install chromium deps tool
-        run: git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git $GITHUB_WORKSPACE/depot_tools
+      - name: Install chromium depot tools
+        run: git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git $GITHUB_WORKSPACE/depot_tools --depth 1
         
       - name: Download chromium source code
         run: |
           export PATH="$PATH:$GITHUB_WORKSPACE/depot_tools"  # TODO: fix
           mkdir $GITHUB_WORKSPACE/chromium && cd $GITHUB_WORKSPACE/chromium
+
           fetch --nohooks --nohistory android
           
       - name: Install chromium build depends
@@ -121,6 +122,9 @@ jobs:
 
       - name: Build APK
         run: |
+          export PATH="$PATH:$GITHUB_WORKSPACE/depot_tools"  # TODO: fix
+          cd $GITHUB_WORKSPACE/chromium/src
+          
           autoninja -C out/Default chrome_public_apk -j 9
           
           ls out/Default
