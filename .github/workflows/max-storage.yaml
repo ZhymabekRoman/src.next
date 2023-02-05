@@ -25,7 +25,7 @@ jobs:
       - name: Reclaiming disk space on / by removing packages
         run: |
            echo "Free additional disk space on host"
-           sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|gfortran-|postgresql-|mongodb-|mysql-|mssql-|libmono|php|aspnetcore)') nginx nodejs apache2 ant imagemagick powershell aria2 ansible shellcheck mono-runtime-common monodoc-manual ruby shellcheck zsync pollinate bazel firefox google-chrome-stable sphinxsearch subversion yarn snmp google-cloud-sdk 
+           sudo apt purge -yq $(dpkg -l | grep '^ii' | awk '{ print $2 }' | grep -P '(cabal-|dotnet-|ghc-|gfortran-|postgresql-|mongodb-|mysql-|mssql-|libmono|php|aspnetcore)') nginx nodejs apache2 ant imagemagick powershell aria2 ansible shellcheck mono-runtime-common monodoc-manual ruby shellcheck zsync pollinate firefox google-chrome-stable sphinxsearch subversion yarn snmp google-cloud-sdk 
            sudo apt autoremove -yq
            sudo apt-get autoclean
 
