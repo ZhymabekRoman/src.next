@@ -76,7 +76,7 @@ jobs:
         run: sudo apt install -y python2 openjdk-8-jdk-headless libncurses5 ccache
         
       - name: Create necessary folders
-        run: mkdir /usr/local/share/fonts
+        run: mkdir -p /usr/local/share/fonts
         
       - name: Install chromium deps tool
         run: git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git $GITHUB_WORKSPACE/depot_tools
