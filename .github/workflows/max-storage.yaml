@@ -24,7 +24,7 @@ jobs:
 
       - name: Enabling i386 and updating APT repository
         run:  |
-          su - -c apt install sudo
+          su -c apt install sudo
           sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get upgrade -y
