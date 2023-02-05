@@ -55,7 +55,7 @@ jobs:
       - name: Reclaiming disk space on / by removing packages
         run: |
            echo "Free additional disk space on host"
-           sudo snap remove $(snap list | awk '!/^Name|^core/ {print $1}')
+           # sudo snap remove $(snap list | awk '!/^Name|^core/ {print $1}')
            sudo systemctl disable snapd.service
            sudo systemctl disable snapd.socket
            sudo systemctl disable snapd.seeded.service
