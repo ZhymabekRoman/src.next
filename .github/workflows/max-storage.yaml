@@ -36,7 +36,7 @@ jobs:
           df -h
 
       - name: Installing Python and OpenJDK
-        run: sudo apt install -y git lsb-release python2 openjdk-8-jdk-headless libncurses5 ccache file
+        run: sudo apt install -y git lsb-release python2 openjdk-8-jdk-headless libncurses5 ccache file wget
         
       - name: Create necessary folders
         run: |
