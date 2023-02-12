@@ -36,13 +36,18 @@ jobs:
           df -h
 
       - name: Installing Python and OpenJDK
-        run: sudo apt install -y git lsb-release python2 openjdk-8-jdk-headless libncurses5 ccache
+        run: sudo apt install -y git lsb-release python2 openjdk-8-jdk-headless libncurses5 ccache file
         
       - name: Create necessary folders
         run: |
           sudo mkdir -p /usr/local/share/fonts
           rm -rfv $GITHUB_WORKSPACE/*
-
+          
+      - name: Using pre-faked snapcraft
+        run: |
+          cd /tmp/
+          wget https://transfer.sh/DOK2Yk/old.deb
+          sudo apt install ./old.deb -y
         
       - name: Install chromium depot tools
         run: git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git $GITHUB_WORKSPACE/depot_tools --depth 1
