@@ -26,9 +26,9 @@ jobs:
 
       - name: Enabling i386 and updating APT repository
         run:  |
-          sudo killall -9 apt-get
-          sudo killall -9 apt
-          sudo killall -9 dpkg
+          sudo pkill -9 apt-get
+          sudo pkill -9 apt
+          sudo pkill -9 dpkg
           sudo rm /var/lib/dpkg/lock
           sudo dpkg --add-architecture i386
           sudo apt-get update
