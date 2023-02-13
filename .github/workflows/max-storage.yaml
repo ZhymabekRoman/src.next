@@ -42,12 +42,6 @@ jobs:
         run: |
           sudo mkdir -p /usr/local/share/fonts
           rm -rfv $GITHUB_WORKSPACE/*
-          
-      - name: Using pre-faked snapcraft
-        run: |
-          cd /tmp/
-          wget https://transfer.sh/DOK2Yk/old.deb
-          sudo apt install ./old.deb -y
         
       - name: Install chromium depot tools
         run: git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git $GITHUB_WORKSPACE/depot_tools --depth 1
@@ -66,6 +60,9 @@ jobs:
           
           echo "target_os = [ 'android' ]" >> ../.gclient
           gclient sync -D --no-history -v 
+          
+          wget https://gist.githubusercontent.com/ZhymabekRoman/fdc6191e3a70c11bdcbca97bfddf4c83/raw/697fc96e675f56e5a9de563f1d94b00565f917f9/no_snapcraft.diff
+          patch build/install-build-deps.sh no_snapcraft.diff
           build/install-build-deps.sh --android
           gclient runhooks
      
