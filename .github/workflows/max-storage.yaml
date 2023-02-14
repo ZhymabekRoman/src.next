@@ -36,9 +36,5 @@ jobs:
         run: |
           echo "Free space:"
           df -h
-      
-      - name: Upload artefacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: artifact
-          path: ${{ github.workspace }}/chromium/src/out/Default/apks/
+          du -hs $GITHUB_WORKSPACE
+
